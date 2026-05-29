@@ -50,6 +50,7 @@ URLs principais:
 
 ```env
 DATABASE_URL=postgresql://...
+REQUIRE_DATABASE_MIGRATIONS=false
 SUPABASE_URL=https://seu-projeto.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
 SUPABASE_BUCKET=sigo-uploads
@@ -67,7 +68,7 @@ SMTP_FROM_EMAIL=notificacoes@seudominio.com.br
 SMTP_FROM_NAME=SIGO - Sistema Operacional
 ```
 
-`DATABASE_URL` deve ser a string de conexão Postgres do Supabase com SSL. Sem ela, o deploy na Vercel falha antes do build para evitar publicar a aplicação sem schema.
+`DATABASE_URL` deve ser a string de conexão Postgres do Supabase com SSL para aplicar migrations. Se ela não estiver configurada, o deploy continua e a migration é ignorada com aviso. Use `REQUIRE_DATABASE_MIGRATIONS=true` quando quiser obrigar o build a falhar sem banco configurado.
 
 ## Migrations
 

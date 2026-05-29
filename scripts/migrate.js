@@ -11,12 +11,13 @@ const root = process.cwd();
 const migrationsDir = path.join(root, 'supabase', 'migrations');
 const fallbackSchema = path.join(root, 'supabase', 'schema.sql');
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+const requireMigrations = process.env.REQUIRE_DATABASE_MIGRATIONS === 'true';
 
 if (!databaseUrl) {
-  if (process.env.VERCEL) {
+  if (requireMigrations) {
     throw new Error('DATABASE_URL ou SUPABASE_DB_URL precisa estar configurada na Vercel para aplicar migrations.');
   }
-  console.log('DATABASE_URL/SUPABASE_DB_URL ausente; migrations ignoradas.');
+  console.warn('DATABASE_URL/SUPABASE_DB_URL ausente; migrations ignoradas. Configure a variavel para aplicar o schema automaticamente.');
   process.exit(0);
 }
 
