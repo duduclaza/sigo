@@ -40,7 +40,7 @@ URLs principais:
 ## Deploy na Vercel
 
 1. Importe o repositório na Vercel.
-2. Use o diretório raiz do projeto.
+2. Preferencialmente use o diretório raiz do projeto. Se a Vercel estiver configurada com Root Directory `client`, o projeto também possui fallback em `client/vercel.json`.
 3. O arquivo `vercel.json` já define:
    - Install Command: `npm install`
    - Build Command: `npm run vercel-build`
