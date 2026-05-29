@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { BarChart3, Calculator, ChevronDown, ClipboardList, FileClock, FileSpreadsheet, LayoutDashboard, LogOut, PencilLine, UploadCloud } from 'lucide-react';
+import { BarChart3, Calculator, ClipboardList, FileClock, FileSpreadsheet, LayoutDashboard, LogOut, PencilLine, UploadCloud } from 'lucide-react';
 import ForecastDashboard from './ForecastDashboard.jsx';
 import ImportarPlano from './ImportarPlano.jsx';
 import CadastroPlano from './CadastroPlano.jsx';
@@ -18,47 +18,44 @@ const links = [
   ['/forecast/relatorios', 'Relatorios', FileSpreadsheet]
 ];
 
-export default function ForecastLayout({ user, onLogout }) {
+export default function ForecastLayout({ user, onLogout, themeToggle }) {
   return (
     <main className="app-shell forecast-shell">
-      <header className="main-header">
-        <div className="main-header-inner">
-          <NavLink className="header-brand" to="/dashboard">
-            <span className="brand-mark small">S</span>
-            <span>SIGO</span>
-          </NavLink>
-          <nav className="header-nav">
-            <NavLink to="/dashboard"><BarChart3 size={16} /> Inicio</NavLink>
-            <div className="nav-dropdown">
-              <button type="button">
-                <LayoutDashboard size={16} />
-                Forecast S&OP
-                <ChevronDown size={14} />
-              </button>
-              <div className="nav-menu">
-                {links.map(([to, label, Icon]) => (
-                  <NavLink key={to} to={to}>
-                    <Icon size={16} />
-                    {label}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-          </nav>
-          <div className="header-actions">
-            <div className="user-pill">
-              {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
-              <div>
-                <strong>{user?.nome}</strong>
-                <small>{user?.perfil_nome}</small>
-              </div>
-            </div>
-            <button className="header-icon-btn" onClick={onLogout} title="Sair">
-              <LogOut size={18} />
-            </button>
+      <aside className="side-rail">
+        <NavLink className="side-brand" to="/dashboard">
+          <span className="brand-mark small">S</span>
+          <div>
+            <strong>SIGO</strong>
+            <small>Forecast S&OP</small>
           </div>
+        </NavLink>
+
+        <nav className="side-nav">
+          <NavLink to="/dashboard"><BarChart3 size={17} /> Inicio</NavLink>
+          <div className="side-section-title">Forecast</div>
+          {links.map(([to, label, Icon]) => (
+            <NavLink key={to} to={to}>
+              <Icon size={17} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="side-footer">
+          {themeToggle}
+          <div className="side-user">
+            {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
+            <div>
+              <strong>{user?.nome}</strong>
+              <small>{user?.perfil_nome}</small>
+            </div>
+          </div>
+          <button className="side-logout" onClick={onLogout}>
+            <LogOut size={17} />
+            Sair
+          </button>
         </div>
-      </header>
+      </aside>
 
       <section className="workspace">
         <div className="page-title">

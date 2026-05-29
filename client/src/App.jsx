@@ -5,7 +5,6 @@ import {
   Building2,
   Camera,
   Car,
-  ChevronDown,
   CheckCircle2,
   Clock3,
   DoorOpen,
@@ -18,6 +17,7 @@ import {
   LogOut,
   Mail,
   Monitor,
+  Moon,
   Pencil,
   Plus,
   QrCode,
@@ -27,6 +27,7 @@ import {
   Settings,
   ShieldCheck,
   Smartphone,
+  Sun,
   Trash2,
   Truck,
   Upload,
@@ -42,7 +43,28 @@ import { Link, Navigate, Route, Routes, useNavigate, useSearchParams } from 'rea
 import { api, clearSession, formatDate, formatDateTime, getStoredUser, getToken, setSession } from './api.js';
 import ForecastLayout from './pages/forecast/ForecastLayout.jsx';
 
+const ThemeContext = createContext(null);
 const AuthContext = createContext(null);
+
+function useTheme() {
+  return useContext(ThemeContext);
+}
+
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState(() => localStorage.getItem('sigo_theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('sigo_theme', theme);
+  }, [theme]);
+
+  const value = useMemo(() => ({
+    theme,
+    toggleTheme: () => setTheme((current) => current === 'dark' ? 'light' : 'dark')
+  }), [theme]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
 
 function useAuth() {
   return useContext(AuthContext);
@@ -119,6 +141,17 @@ function Field({ label, children }) {
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  const Icon = theme === 'dark' ? Sun : Moon;
+  return (
+    <button type="button" className="theme-toggle" onClick={toggleTheme}>
+      <Icon size={17} />
+      {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+    </button>
   );
 }
 
@@ -202,6 +235,9 @@ function LoginPage() {
 
       <section className="login-panel">
         <div className="login-box">
+          <div className="login-theme">
+            <ThemeToggle />
+          </div>
           <div className="login-title">
             <div className="brand-mark small">S</div>
             <div>
@@ -306,90 +342,75 @@ function DashboardPage() {
 
   return (
     <main className="app-shell">
-      <header className="main-header">
-        <div className="main-header-inner">
-          <button className="header-brand" onClick={() => setView('inicio')}>
-            <span className="brand-mark small">S</span>
-            <span>SIGO</span>
+      <aside className="side-rail">
+        <button className="side-brand" onClick={() => setView('inicio')}>
+          <span className="brand-mark small">S</span>
+          <div>
+            <strong>SIGO</strong>
+            <small>Gestao operacional</small>
+          </div>
+        </button>
+
+        <nav className="side-nav">
+          <button className={view === 'inicio' ? 'active' : ''} onClick={() => setView('inicio')}>
+            <LayoutDashboard size={17} />
+            Inicio
           </button>
 
-          <nav className="header-nav">
-            <button className={view === 'inicio' ? 'active' : ''} onClick={() => setView('inicio')}>
-              <LayoutDashboard size={16} />
-              Inicio
-            </button>
+          <details className="side-group" open>
+            <summary><BarChart3 size={17} /> Indicadores</summary>
+            <button type="button"><LayoutDashboard size={16} /> Dashboards</button>
+            <button type="button"><Users size={16} /> Absenteismo</button>
+            <button type="button"><Clock3 size={16} /> Horas Extras</button>
+            <button type="button"><ShieldCheck size={16} /> Qualidade</button>
+          </details>
 
-            <div className="nav-dropdown">
-              <button type="button">
-                <BarChart3 size={16} />
-                Indicadores
-                <ChevronDown size={14} />
-              </button>
-              <div className="nav-menu">
-                <button type="button"><LayoutDashboard size={16} /> Dashboards</button>
-                <button type="button"><Users size={16} /> Absenteismo</button>
-                <button type="button"><Clock3 size={16} /> Horas Extras</button>
-                <button type="button"><ShieldCheck size={16} /> Qualidade</button>
-              </div>
+          {hasExpedicao && (
+            <details className="side-group" open={view === 'romaneios'}>
+              <summary><Truck size={17} /> Expedicao</summary>
+              {(hasPermission('acesso_romaneios') || hasPermission('acesso_expedicao')) && (
+                <button className={view === 'romaneios' ? 'active' : ''} onClick={() => setView('romaneios')}><FileText size={16} /> Romaneios</button>
+              )}
+              <Link to="/painel" target="_blank"><Monitor size={16} /> Monitor de Docas</Link>
+              <Link to="/motorista" target="_blank"><Smartphone size={16} /> App do Motorista</Link>
+              <Link to="/checkin" target="_blank"><DoorOpen size={16} /> Porteiro Check-in</Link>
+            </details>
+          )}
+
+          <details className="side-group">
+            <summary><LayoutDashboard size={17} /> Forecast S&OP</summary>
+            <Link to="/forecast/dashboard"><LayoutDashboard size={16} /> Dashboard Forecast</Link>
+            <Link to="/forecast/importar"><Upload size={16} /> Importar Plano S&OP</Link>
+            <Link to="/forecast/cadastro"><Pencil size={16} /> Cadastro Manual</Link>
+            <Link to="/forecast/previsao"><ListChecks size={16} /> Previsao Operacional</Link>
+            <Link to="/forecast/simulador"><RefreshCw size={16} /> Simulador</Link>
+            <Link to="/forecast/historico"><History size={16} /> Historico</Link>
+            <Link to="/forecast/relatorios"><FileText size={16} /> Relatorios</Link>
+          </details>
+
+          {canAdmin && (
+            <button className={view === 'admin' ? 'active' : ''} onClick={() => setView('admin')}>
+              <Settings size={17} />
+              Configuracoes
+            </button>
+          )}
+        </nav>
+
+        <div className="side-footer">
+          <ThemeToggle />
+          <button className={view === 'conta' ? 'side-user active' : 'side-user'} onClick={() => setView('conta')}>
+            {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
+            <div>
+              <strong>{user?.nome}</strong>
+              <small>{user?.perfil_nome}</small>
             </div>
-
-            {hasExpedicao && (
-              <div className="nav-dropdown">
-                <button className={view === 'romaneios' ? 'active' : ''}>
-                  <Truck size={16} />
-                  Expedicao
-                  <ChevronDown size={14} />
-                </button>
-                <div className="nav-menu">
-                  {(hasPermission('acesso_romaneios') || hasPermission('acesso_expedicao')) && (
-                    <button onClick={() => setView('romaneios')}><FileText size={16} /> Romaneios</button>
-                  )}
-                  <Link to="/painel" target="_blank"><Monitor size={16} /> Monitor de Docas</Link>
-                  <Link to="/motorista" target="_blank"><Smartphone size={16} /> App do Motorista</Link>
-                  <Link to="/checkin" target="_blank"><DoorOpen size={16} /> Porteiro Check-in</Link>
-                </div>
-              </div>
-            )}
-
-            <div className="nav-dropdown">
-              <button type="button">
-                <LayoutDashboard size={16} />
-                Forecast S&OP
-                <ChevronDown size={14} />
-              </button>
-              <div className="nav-menu">
-                <Link to="/forecast/dashboard"><LayoutDashboard size={16} /> Dashboard Forecast</Link>
-                <Link to="/forecast/importar"><Upload size={16} /> Importar Plano S&OP</Link>
-                <Link to="/forecast/cadastro"><Pencil size={16} /> Cadastro Manual</Link>
-                <Link to="/forecast/previsao"><ListChecks size={16} /> Previsao Operacional</Link>
-                <Link to="/forecast/simulador"><RefreshCw size={16} /> Simulador de Capacidade</Link>
-                <Link to="/forecast/historico"><History size={16} /> Historico de Revisoes</Link>
-                <Link to="/forecast/relatorios"><FileText size={16} /> Relatorios</Link>
-              </div>
-            </div>
-
-            {canAdmin && (
-              <button className={view === 'admin' ? 'active' : ''} onClick={() => setView('admin')}>
-                <Settings size={16} />
-                Configuracoes
-              </button>
-            )}
-          </nav>
-
-          <div className="header-actions">
-            <button className={view === 'conta' ? 'user-pill active' : 'user-pill'} onClick={() => setView('conta')}>
-              {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
-              <div>
-                <strong>{user?.nome}</strong>
-                <small>{user?.perfil_nome}</small>
-              </div>
-            </button>
-            <button className="header-icon-btn" onClick={logout} title="Sair">
-              <LogOut size={18} />
-            </button>
-          </div>
+          </button>
+          <button className="side-logout" onClick={logout}>
+            <LogOut size={17} />
+            Sair
+          </button>
         </div>
-      </header>
+      </aside>
 
       <section className="workspace">
         <div className="page-title">
@@ -1198,7 +1219,7 @@ function AccountView() {
 
 function ForecastModulePage() {
   const { user, logout } = useAuth();
-  return <ForecastLayout user={user} onLogout={logout} />;
+  return <ForecastLayout user={user} onLogout={logout} themeToggle={<ThemeToggle />} />;
 }
 
 function PainelDocasPage() {
@@ -1445,16 +1466,18 @@ function CheckinPage() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-        <Route path="/forecast/*" element={<RequireAuth><ForecastModulePage /></RequireAuth>} />
-        <Route path="/painel" element={<PainelDocasPage />} />
-        <Route path="/motorista" element={<MotoristaPage />} />
-        <Route path="/checkin" element={<RequireAuth><CheckinPage /></RequireAuth>} />
-        <Route path="*" element={<Navigate to={getToken() ? '/dashboard' : '/login'} replace />} />
-      </Routes>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+          <Route path="/forecast/*" element={<RequireAuth><ForecastModulePage /></RequireAuth>} />
+          <Route path="/painel" element={<PainelDocasPage />} />
+          <Route path="/motorista" element={<MotoristaPage />} />
+          <Route path="/checkin" element={<RequireAuth><CheckinPage /></RequireAuth>} />
+          <Route path="*" element={<Navigate to={getToken() ? '/dashboard' : '/login'} replace />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
