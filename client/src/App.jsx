@@ -4,6 +4,7 @@ import {
   Building2,
   Camera,
   Car,
+  ChevronDown,
   CheckCircle2,
   Clock3,
   DoorOpen,
@@ -292,57 +293,87 @@ function DashboardPage() {
   const { user, logout, hasPermission } = useAuth();
   const [view, setView] = useState('inicio');
 
-  const nav = [
-    { id: 'inicio', label: 'Inicio', icon: LayoutDashboard, show: true },
-    { id: 'romaneios', label: 'Romaneios', icon: FileText, show: hasPermission('acesso_romaneios') || hasPermission('acesso_expedicao') },
-    { id: 'admin', label: 'Administracao', icon: Settings, show: hasPermission('cadastrar_usuarios') || hasPermission('cadastrar_perfis') || hasPermission('cadastrar_transportadoras') },
-    { id: 'conta', label: 'Minha conta', icon: UserRound, show: true }
-  ].filter((item) => item.show);
+  const hasExpedicao = hasPermission('acesso_romaneios') || hasPermission('acesso_expedicao') || hasPermission('acesso_checkin') || hasPermission('acesso_monitor_docas') || hasPermission('acesso_app_motorista');
+  const canAdmin = hasPermission('cadastrar_usuarios') || hasPermission('cadastrar_perfis') || hasPermission('cadastrar_transportadoras');
+  const titles = {
+    inicio: 'Centro operacional',
+    romaneios: 'Romaneios',
+    admin: 'Administracao',
+    conta: 'Minha conta'
+  };
 
   return (
     <main className="app-shell">
-      <aside className="sidebar">
-        <Link className="side-brand" to="/dashboard">
-          <span className="brand-mark small">S</span>
-          <strong>SIGO</strong>
-        </Link>
+      <header className="main-header">
+        <div className="main-header-inner">
+          <button className="header-brand" onClick={() => setView('inicio')}>
+            <span className="brand-mark small">S</span>
+            <span>SIGO</span>
+          </button>
 
-        <nav className="side-nav">
-          {nav.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button key={item.id} className={view === item.id ? 'active' : ''} onClick={() => setView(item.id)}>
-                <Icon size={18} />
-                {item.label}
+          <nav className="header-nav">
+            <button className={view === 'inicio' ? 'active' : ''} onClick={() => setView('inicio')}>
+              <LayoutDashboard size={16} />
+              Inicio
+            </button>
+
+            <button type="button" className="muted-nav">
+              Dashboards
+            </button>
+
+            {hasExpedicao && (
+              <div className="nav-dropdown">
+                <button className={view === 'romaneios' ? 'active' : ''}>
+                  <Truck size={16} />
+                  Expedicao
+                  <ChevronDown size={14} />
+                </button>
+                <div className="nav-menu">
+                  {(hasPermission('acesso_romaneios') || hasPermission('acesso_expedicao')) && (
+                    <button onClick={() => setView('romaneios')}><FileText size={16} /> Romaneios</button>
+                  )}
+                  <Link to="/painel" target="_blank"><Monitor size={16} /> Monitor de Docas</Link>
+                  <Link to="/motorista" target="_blank"><Smartphone size={16} /> App do Motorista</Link>
+                  <Link to="/checkin" target="_blank"><DoorOpen size={16} /> Porteiro Check-in</Link>
+                </div>
+              </div>
+            )}
+
+            <button type="button" className="muted-nav">Absenteismo</button>
+            <button type="button" className="muted-nav">Horas Extras</button>
+            <button type="button" className="muted-nav">Qualidade</button>
+
+            {canAdmin && (
+              <button className={view === 'admin' ? 'active' : ''} onClick={() => setView('admin')}>
+                <Settings size={16} />
+                Configuracoes
               </button>
-            );
-          })}
-        </nav>
+            )}
+          </nav>
 
-        <div className="side-links">
-          <Link to="/painel" target="_blank"><Monitor size={17} /> Monitor</Link>
-          <Link to="/motorista" target="_blank"><Smartphone size={17} /> Motorista</Link>
-          <Link to="/checkin" target="_blank"><DoorOpen size={17} /> Check-in</Link>
-        </div>
-      </aside>
-
-      <section className="workspace">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">{user?.perfil_nome}</p>
-            <h1>{view === 'inicio' ? 'Centro operacional' : nav.find((item) => item.id === view)?.label}</h1>
-          </div>
-          <div className="user-pill">
-            {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
-            <div>
-              <strong>{user?.nome}</strong>
-              <small>{user?.email}</small>
-            </div>
-            <button className="icon-btn" onClick={logout} title="Sair">
+          <div className="header-actions">
+            <button className={view === 'conta' ? 'user-pill active' : 'user-pill'} onClick={() => setView('conta')}>
+              {user?.foto_url ? <img src={user.foto_url} alt="" /> : <span>{user?.nome?.[0] || 'S'}</span>}
+              <div>
+                <strong>{user?.nome}</strong>
+                <small>{user?.perfil_nome}</small>
+              </div>
+            </button>
+            <button className="header-icon-btn" onClick={logout} title="Sair">
               <LogOut size={18} />
             </button>
           </div>
-        </header>
+        </div>
+      </header>
+
+      <section className="workspace">
+        <div className="page-title">
+          <div>
+            <p className="eyebrow">{user?.perfil_nome}</p>
+            <h1>{titles[view] || 'SIGO'}</h1>
+            <span>{user?.email}</span>
+          </div>
+        </div>
 
         <section className="view-stage">
           {view === 'inicio' && <HomeView />}
@@ -361,29 +392,39 @@ function HomeView() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([
+    Promise.allSettled([
       api('/api/romaneios?tipo=ativos'),
       api('/api/docas/status'),
       hasPermission('cadastrar_usuarios') ? api('/api/solicitacoes') : Promise.resolve({ data: [] })
     ])
       .then(([romaneios, docas, solicitacoes]) => {
         if (!alive) return;
-        setState({ loading: false, romaneios: romaneios.data, docas: docas.data, solicitacoes: solicitacoes.data });
-      })
-      .catch((error) => setState({ loading: false, error: error.message }));
+        const firstError = [romaneios, docas, solicitacoes].find((result) => result.status === 'rejected')?.reason;
+        setState({
+          loading: false,
+          error: firstError?.message || '',
+          romaneios: romaneios.status === 'fulfilled' ? romaneios.value.data || [] : [],
+          docas: docas.status === 'fulfilled' ? docas.value.data || [] : [],
+          solicitacoes: solicitacoes.status === 'fulfilled' ? solicitacoes.value.data || [] : []
+        });
+      });
     return () => {
       alive = false;
     };
   }, [hasPermission]);
 
   if (state.loading) return <Spinner />;
-  if (state.error) return <Notice type="error">{state.error}</Notice>;
 
   const docasOcupadas = state.docas.filter((doca) => doca.op_id).length;
   const atrasos = state.docas.filter((doca) => doca.min_carregando > 90 || doca.min_no_cd > 180).length;
 
   return (
     <div className="grid-page">
+      {state.error && (
+        <div className="home-warning">
+          <Notice type="error">{state.error}</Notice>
+        </div>
+      )}
       <div className="metric-card">
         <FileText />
         <span>Romaneios hoje</span>
