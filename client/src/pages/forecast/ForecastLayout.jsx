@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { BarChart3, Calculator, ClipboardList, FileClock, FileSpreadsheet, LayoutDashboard, LogOut, PencilLine, UploadCloud } from 'lucide-react';
+import { BarChart3, Calculator, ChevronDown, ClipboardList, FileClock, FileSpreadsheet, LayoutDashboard, LogOut, PencilLine, UploadCloud } from 'lucide-react';
 import ForecastDashboard from './ForecastDashboard.jsx';
 import ImportarPlano from './ImportarPlano.jsx';
 import CadastroPlano from './CadastroPlano.jsx';
@@ -29,12 +29,21 @@ export default function ForecastLayout({ user, onLogout }) {
           </NavLink>
           <nav className="header-nav">
             <NavLink to="/dashboard"><BarChart3 size={16} /> Inicio</NavLink>
-            {links.map(([to, label, Icon]) => (
-              <NavLink key={to} to={to}>
-                <Icon size={16} />
-                {label}
-              </NavLink>
-            ))}
+            <div className="nav-dropdown">
+              <button type="button">
+                <LayoutDashboard size={16} />
+                Forecast S&OP
+                <ChevronDown size={14} />
+              </button>
+              <div className="nav-menu">
+                {links.map(([to, label, Icon]) => (
+                  <NavLink key={to} to={to}>
+                    <Icon size={16} />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           </nav>
           <div className="header-actions">
             <div className="user-pill">

@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  BarChart3,
   Bell,
   Building2,
   Camera,
@@ -318,9 +319,19 @@ function DashboardPage() {
               Inicio
             </button>
 
-            <button type="button" className="muted-nav">
-              Dashboards
-            </button>
+            <div className="nav-dropdown">
+              <button type="button">
+                <BarChart3 size={16} />
+                Indicadores
+                <ChevronDown size={14} />
+              </button>
+              <div className="nav-menu">
+                <button type="button"><LayoutDashboard size={16} /> Dashboards</button>
+                <button type="button"><Users size={16} /> Absenteismo</button>
+                <button type="button"><Clock3 size={16} /> Horas Extras</button>
+                <button type="button"><ShieldCheck size={16} /> Qualidade</button>
+              </div>
+            </div>
 
             {hasExpedicao && (
               <div className="nav-dropdown">
@@ -339,10 +350,6 @@ function DashboardPage() {
                 </div>
               </div>
             )}
-
-            <button type="button" className="muted-nav">Absenteismo</button>
-            <button type="button" className="muted-nav">Horas Extras</button>
-            <button type="button" className="muted-nav">Qualidade</button>
 
             <div className="nav-dropdown">
               <button type="button">

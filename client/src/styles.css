@@ -330,20 +330,20 @@ td input[type="checkbox"],
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #173a72;
+  background: linear-gradient(135deg, #10284f, #173a72 58%, #274f87);
   color: white;
-  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.16);
+  box-shadow: 0 10px 30px rgba(20, 33, 61, 0.18);
 }
 
 .main-header-inner {
   width: min(1440px, 100%);
-  min-height: 66px;
+  min-height: 68px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 14px;
 }
 
 .header-brand {
@@ -365,30 +365,34 @@ td input[type="checkbox"],
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow: visible;
 }
 
 .header-nav button,
 .header-nav a {
   min-height: 38px;
   border: 0;
-  border-radius: 8px;
-  padding: 9px 11px;
+  border-radius: 999px;
+  padding: 8px 11px;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.07);
   color: rgba(255, 255, 255, 0.86);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
 }
 
 .header-nav button:hover,
 .header-nav a:hover,
 .header-nav button.active,
 .header-nav a.active {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.18);
   color: white;
 }
 
@@ -402,15 +406,16 @@ td input[type="checkbox"],
 
 .nav-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 0;
-  min-width: 230px;
+  min-width: 250px;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow);
+  z-index: 30;
   opacity: 0;
   transform: translateY(-4px);
   pointer-events: none;
@@ -429,6 +434,8 @@ td input[type="checkbox"],
   width: 100%;
   justify-content: flex-start;
   color: var(--ink);
+  background: transparent;
+  border-radius: 8px;
 }
 
 .nav-menu button:hover,
@@ -442,6 +449,7 @@ td input[type="checkbox"],
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 
 .header-icon-btn {
@@ -1077,10 +1085,6 @@ th.tight {
   border-color: #ef4444;
 }
 
-.forecast-shell .header-nav {
-  overflow-x: auto;
-}
-
 .forecast-page,
 .forecast-panel {
   min-width: 0;
@@ -1547,8 +1551,9 @@ th.tight {
   .header-nav {
     order: 3;
     flex-basis: 100%;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    justify-content: flex-start;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .grid-page {
@@ -1599,6 +1604,29 @@ th.tight {
 
   .user-pill {
     width: 100%;
+  }
+
+  .header-nav {
+    gap: 6px;
+    position: relative;
+  }
+
+  .header-nav button,
+  .header-nav a {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .nav-dropdown {
+    position: static;
+  }
+
+  .nav-menu {
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 0;
+    width: auto;
   }
 
   .monitor-head {
