@@ -10,6 +10,7 @@ import nodemailer from 'nodemailer';
 import { parse } from 'csv-parse/sync';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import { createForecastRouter } from './routes/forecast.routes.js';
 
 const app = express();
 const upload = multer({
@@ -1628,6 +1629,8 @@ motoristaRouter.get('/pendentes', asyncRoute(async (_req, res) => {
 }));
 
 app.use('/api/motorista', motoristaRouter);
+
+app.use('/api/forecast', createForecastRouter({ requireAuth, supabase }));
 
 app.get('/api/health', (_req, res) => {
   apiOk(res, { service: 'sigo-server', timestamp: new Date().toISOString() });

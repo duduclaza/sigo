@@ -39,6 +39,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, clearSession, formatDate, formatDateTime, getStoredUser, getToken, setSession } from './api.js';
+import ForecastLayout from './pages/forecast/ForecastLayout.jsx';
 
 const AuthContext = createContext(null);
 
@@ -342,6 +343,23 @@ function DashboardPage() {
             <button type="button" className="muted-nav">Absenteismo</button>
             <button type="button" className="muted-nav">Horas Extras</button>
             <button type="button" className="muted-nav">Qualidade</button>
+
+            <div className="nav-dropdown">
+              <button type="button">
+                <LayoutDashboard size={16} />
+                Forecast S&OP
+                <ChevronDown size={14} />
+              </button>
+              <div className="nav-menu">
+                <Link to="/forecast/dashboard"><LayoutDashboard size={16} /> Dashboard Forecast</Link>
+                <Link to="/forecast/importar"><Upload size={16} /> Importar Plano S&OP</Link>
+                <Link to="/forecast/cadastro"><Pencil size={16} /> Cadastro Manual</Link>
+                <Link to="/forecast/previsao"><ListChecks size={16} /> Previsao Operacional</Link>
+                <Link to="/forecast/simulador"><RefreshCw size={16} /> Simulador de Capacidade</Link>
+                <Link to="/forecast/historico"><History size={16} /> Historico de Revisoes</Link>
+                <Link to="/forecast/relatorios"><FileText size={16} /> Relatorios</Link>
+              </div>
+            </div>
 
             {canAdmin && (
               <button className={view === 'admin' ? 'active' : ''} onClick={() => setView('admin')}>
@@ -1171,6 +1189,11 @@ function AccountView() {
   );
 }
 
+function ForecastModulePage() {
+  const { user, logout } = useAuth();
+  return <ForecastLayout user={user} onLogout={logout} />;
+}
+
 function PainelDocasPage() {
   const [docas, setDocas] = useState([]);
   const [clock, setClock] = useState(new Date());
@@ -1419,6 +1442,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+        <Route path="/forecast/*" element={<RequireAuth><ForecastModulePage /></RequireAuth>} />
         <Route path="/painel" element={<PainelDocasPage />} />
         <Route path="/motorista" element={<MotoristaPage />} />
         <Route path="/checkin" element={<RequireAuth><CheckinPage /></RequireAuth>} />
